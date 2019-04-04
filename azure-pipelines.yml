@@ -5,7 +5,7 @@ pool:
   vmImage: 'Ubuntu-16.04' 
 
 variables:
-  azureSubscription: Contoso  
+  azureSubscription: Visual Studio  
 
 steps:
 - task: Maven@3
