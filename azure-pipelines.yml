@@ -1,0 +1,41 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'Ubuntu-16.04' 
+
+variables:
+  azureSubscription: Contoso  
+
+steps:
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: false
+    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+    goals: 'package'   
+
+- task: CopyFiles@2
+  displayName: Copy Files
+  inputs:
+    SourceFolder: $(system.defaultworkingdirectory)/target/azure-functions/
+    Contents: '**'
+    TargetFolder: $(build.artifactstagingdirectory)   
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact
+  inputs:
+    PathtoPublish: $(build.artifactstagingdirectory)    
+
+- task: AzureFunctionApp@1
+  displayName: Azure Function App deploy
+  inputs:
+    azureSubscription: $(azureSubscription)
+    appType: functionApp
+    appName: javafapp
+    package: $(build.artifactstagingdirectory)/javafunctions
+
